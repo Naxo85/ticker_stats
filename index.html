@@ -3,59 +3,99 @@
   <head>
     <meta charset="UTF-8" />
     <title>Consulta de Tickers</title>
-
-    <!-- Cargar Bootstrap 5 desde un CDN -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      integrity="sha384-ENjdO4Dr2bkBIFxQX7I1C7e1hXii+14lTnLDvQkrRz8b2nOHGJmK6zP4M4Z7Tub5"
-      crossorigin="anonymous"
-    />
     <style>
-      /* Puedes añadir ajustes adicionales aquí si quieres refinar el estilo */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 30px;
+      }
+
+      h1 {
+        margin-bottom: 1rem;
+      }
+
+      /* Encapsular el formulario en un contenedor */
+      .form-container {
+        display: flex;         /* Ubica el label+input+botón en línea */
+        align-items: center;   /* Centra verticalmente */
+        gap: 0.5rem;           /* Separación horizontal entre elementos */
+        margin-bottom: 1rem;   /* Espacio debajo del form */
+      }
+
+      label {
+        font-weight: bold;
+      }
+
+      input[type="text"] {
+        padding: 6px;
+        font-size: 1rem;
+        min-width: 120px; /* Para que el input no sea demasiado pequeño */
+      }
+
+      button {
+        padding: 6px 12px;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+
       #spinner {
         font-style: italic;
+        color: #666;
+        margin-bottom: 10px;
       }
+
       #errorMsg {
         color: red;
+        margin-bottom: 10px;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 50%;         /* Ajusta el ancho de la tabla */
+        min-width: 300px;   /* Un ancho mínimo para evitar demasiada compresión */
+      }
+
+      th, td {
+        border: 1px solid #bbb;
+        padding: 8px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background-color: #f2f2f2;
+        width: 40%; /* Para que la columna de Atributo sea más estrecha */
+      }
+
+      /* Ajustes de responsividad */
+      @media (max-width: 600px) {
+        table {
+          width: 100%;
+        }
       }
     </style>
   </head>
-  <body class="bg-light">
-    <div class="container mt-5">
-      <h1 class="mb-4">Consulta de Tickers</h1>
+  <body>
+    <h1>Consulta de Tickers</h1>
 
-      <form id="tickerForm" class="row g-3">
-        <div class="col-auto">
-          <label for="tickerInput" class="visually-hidden">Ticker</label>
-          <input
-            type="text"
-            class="form-control"
-            id="tickerInput"
-            placeholder="Ej: HOOD o NVDA"
-          />
-        </div>
-        <div class="col-auto">
-          <button type="submit" class="btn btn-primary mb-3">Buscar</button>
-        </div>
-      </form>
+    <form id="tickerForm" class="form-container">
+      <label for="tickerInput">Ticker:</label>
+      <input type="text" id="tickerInput" placeholder="Ej: HOOD o NVDA" />
+      <button type="submit">Buscar</button>
+    </form>
 
-      <div id="spinner" class="text-muted" style="display: none;">Cargando datos...</div>
-      <div id="errorMsg" class="text-danger" style="display: none;"></div>
+    <div id="spinner" style="display:none;">Cargando datos...</div>
+    <div id="errorMsg" style="display:none;"></div>
 
-      <div id="contenido" style="display: none;">
-        <div class="table-responsive">
-          <table class="table table-bordered table-hover">
-            <thead class="table-light">
-              <tr>
-                <th>Atributo</th>
-                <th>Valor</th>
-              </tr>
-            </thead>
-            <tbody id="datosTabla"></tbody>
-          </table>
-        </div>
-      </div>
+    <div id="contenido" style="display:none;">
+      <table>
+        <thead>
+          <tr>
+            <th>Atributo</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+        <tbody id="datosTabla"></tbody>
+      </table>
     </div>
 
     <script>
@@ -67,7 +107,7 @@
       const datosTabla = document.getElementById("datosTabla");
 
       form.addEventListener("submit", (e) => {
-        e.preventDefault(); // Evita el comportamiento por defecto del form
+        e.preventDefault();
 
         const ticker = tickerInput.value.trim();
         if (!ticker) {
@@ -75,14 +115,14 @@
           return;
         }
 
-        // Limpia mensajes/tabla previos
+        // Limpia mensajes previos
         datosTabla.innerHTML = "";
         spinner.style.display = "block";
         errorMsg.style.display = "none";
         contenido.style.display = "none";
 
         // URL de tu Cloud Function
-        const FUNCTION_URL = "https://tickers-stats-714254943648.europe-southwest1.run.app/get_ticker_stats"; 
+        const FUNCTION_URL = "https://tickers-stats-714254943648.europe-southwest1.run.app/get_ticker_stats";
         const urlConTicker = `${FUNCTION_URL}?ticker=${ticker}`;
 
         fetch(urlConTicker)
@@ -121,13 +161,5 @@
           });
       });
     </script>
-
-    <!-- JS de Bootstrap (opcional si necesitas componentes interactivos) -->
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+UcmB7Mw5E6Bp4yXvf5suZo3h7KZi"
-      crossorigin="anonymous"
-    ></script>
   </body>
 </html>
-
