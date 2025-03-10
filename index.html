@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Consulta de Ticker</title>
+    <style>
+      /* Estilos básicos */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      form {
+        margin-bottom: 20px;
+      }
+      input[type="text"] {
+        padding: 6px;
+        font-size: 1rem;
+      }
+      button {
+        padding: 6px 12px;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      table {
+        border-collapse: collapse;
+        width: 60%;
+        margin-top: 10px;
+      }
+      th, td {
+        border: 1px solid #bbb;
+        padding: 8px 12px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      #spinner {
+        font-style: italic;
+      }
+      #errorMsg {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Consulta de Tickers</h1>
+    <form id="tickerForm">
+      <label for="tickerInput">Ticker:</label>
+      <input type="text" id="tickerInput" placeholder="Ej: HOOD o NVDA" />
+      <button type="submit">Buscar</button>
+    </form>
+
+    <div id="spinner" style="display:none;">Cargando datos...</div>
+    <div id="errorMsg" style="display:none;"></div>
+    <div id="contenido" style="display:none;">
+      <table>
+        <thead>
+          <tr>
+            <th>Atributo</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+        <tbody id="datosTabla"></tbody>
+      </table>
+    </div>
+
+    <script>
+      const form = document.getElementById("tickerForm");
+      const tickerInput = document.getElementById("tickerInput");
+      const spinner = document.getElementById("spinner");
+      const errorMsg = document.getElementById("errorMsg");
+      const contenido = document.getElementById("contenido");
+      const datosTabla = document.getElementById("datosTabla");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault(); // Para que no recargue la página
+
+        const ticker = tickerInput.value.trim();
+        if (!ticker) {
+          alert("Introduce un ticker válido");
+          return;
+        }
+
+        // Limpia mensajes previos
+        datosTabla.innerHTML = "";
+        spinner.style.display = "block";
+        errorMsg.style.display = "none";
+        contenido.style.display = "none";
+
+        // URL de tu Cloud Function pública
+        // Ajusta la parte "https://..." a la URL real de tu función
+        const FUNCTION_URL = "https://tickers-stats-714254943648.europe-southwest1.run.app/get_ticker_stats";
+        // Añadimos el parámetro ?ticker=
+        const urlConTicker = `${FUNCTION_URL}?ticker=${ticker}`;
+
+        // Petición fetch
+        fetch(urlConTicker)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Error de servidor: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            spinner.style.display = "none";
+            contenido.style.display = "block";
+            
+            // Rellenamos la tabla
+            for (let key in data) {
+              let row = document.createElement("tr");
+              let cellKey = document.createElement("td");
+              let cellVal = document.createElement("td");
+
+              cellKey.textContent = key;
+
+              if (typeof data[key] === "object" && data[key] !== null) {
+                // Si es un objeto o array, lo mostramos como JSON
+                cellVal.textContent = JSON.stringify(data[key], null, 2);
+              } else {
+                cellVal.textContent = data[key];
+              }
+
+              row.appendChild(cellKey);
+              row.appendChild(cellVal);
+              datosTabla.appendChild(row);
+            }
+          })
+          .catch((error) => {
+            spinner.style.display = "none";
+            errorMsg.style.display = "block";
+            errorMsg.textContent = `Error al cargar datos: ${error.message}`;
+          });
+      });
+    </script>
+  </body>
+</html>
